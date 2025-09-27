@@ -1,10 +1,12 @@
 
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { colors, commonStyles } from '../../styles/commonStyles';
 import { mockBookings, mockHairdressers } from '../../data/mockData';
 import AppLogo from '../../components/AppLogo';
 import Icon from '../../components/Icon';
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 export default function HairdresserBookingsScreen() {
   const [activeTab, setActiveTab] = useState<'today' | 'upcoming' | 'past'>('today');
@@ -31,8 +33,7 @@ export default function HairdresserBookingsScreen() {
 
   const renderBookingCard = (booking: any) => {
     const hairdresser = mockHairdressers[0]; // Current hairdresser
-    const service = hairdresser.services.find(s => s.id === booking.serviceId);
-
+    
     return (
       <View key={booking.id} style={[commonStyles.card, styles.bookingCard]}>
         <View style={styles.bookingHeader}>
@@ -50,8 +51,14 @@ export default function HairdresserBookingsScreen() {
         </View>
         
         <Text style={styles.clientName}>Client Booking</Text>
-        <Text style={styles.serviceName}>{service?.name}</Text>
-        <Text style={styles.servicePrice}>${booking.totalPrice}</Text>
+        <Text style={styles.bookingDate}>{formatDate(new Date(booking.date))}</Text>
+        
+        <View style={styles.serviceInfo}>
+          <Text style={styles.serviceName}>
+            {hairdresser.services.find(s => s.id === booking.serviceId)?.name}
+          </Text>
+          <Text style={styles.servicePrice}>${booking.totalPrice}</Text>
+        </View>
 
         <View style={styles.bookingActions}>
           {booking.status === 'pending' && (
@@ -65,14 +72,9 @@ export default function HairdresserBookingsScreen() {
             </>
           )}
           {booking.status === 'confirmed' && (
-            <>
-              <TouchableOpacity style={styles.actionButton}>
-                <Text style={styles.actionButtonText}>Reschedule</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.actionButton, styles.completeButton]}>
-                <Text style={[styles.actionButtonText, { color: 'white' }]}>Complete</Text>
-              </TouchableOpacity>
-            </>
+            <TouchableOpacity style={styles.actionButton}>
+              <Text style={styles.actionButtonText}>View Details</Text>
+            </TouchableOpacity>
           )}
         </View>
       </View>
@@ -82,7 +84,7 @@ export default function HairdresserBookingsScreen() {
   const getCurrentBookings = () => {
     const today = new Date();
     const todayStr = today.toDateString();
-
+    
     switch (activeTab) {
       case 'today':
         return mockBookings.filter(booking => 
@@ -95,9 +97,7 @@ export default function HairdresserBookingsScreen() {
         );
       case 'past':
         return mockBookings.filter(booking => 
-          new Date(booking.date) < today || 
-          booking.status === 'completed' || 
-          booking.status === 'cancelled'
+          new Date(booking.date) < today || booking.status === 'completed'
         );
       default:
         return [];
@@ -131,10 +131,13 @@ export default function HairdresserBookingsScreen() {
 
   return (
     <View style={commonStyles.container}>
-      <View style={commonStyles.content}>
+      <View style={[commonStyles.content, styles.responsiveContent]}>
         <View style={styles.header}>
           <AppLogo size="small" />
-          <Text style={[commonStyles.title, styles.headerTitle]}>Bookings</Text>
+        </View>
+
+        <View style={styles.titleSection}>
+          <Text style={[commonStyles.title, styles.responsiveTitle]}>My Bookings</Text>
         </View>
 
         <View style={styles.tabContainer}>
@@ -169,9 +172,17 @@ export default function HairdresserBookingsScreen() {
           
           {currentBookings.length === 0 && (
             <View style={styles.emptyState}>
-              <Icon name="calendar-outline" size={64} color={colors.textLight} />
-              <Text style={styles.emptyTitle}>{emptyMessage.title}</Text>
-              <Text style={styles.emptySubtitle}>{emptyMessage.subtitle}</Text>
+              <Icon 
+                name="calendar-outline"
+                size={64} 
+                color={colors.textLight} 
+              />
+              <Text style={styles.emptyTitle}>
+                {emptyMessage.title}
+              </Text>
+              <Text style={styles.emptySubtitle}>
+                {emptyMessage.subtitle}
+              </Text>
             </View>
           )}
         </ScrollView>
@@ -181,13 +192,23 @@ export default function HairdresserBookingsScreen() {
 }
 
 const styles = StyleSheet.create({
+  responsiveContent: {
+    paddingHorizontal: Math.max(16, screenWidth * 0.05),
+    paddingTop: Math.max(16, screenHeight * 0.02),
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: Math.max(24, screenHeight * 0.03),
+    paddingHorizontal: 4,
   },
-  headerTitle: {
-    marginLeft: 16,
+  titleSection: {
+    marginBottom: Math.max(20, screenHeight * 0.025),
+    paddingHorizontal: 4,
+  },
+  responsiveTitle: {
+    fontSize: Math.min(28, Math.max(22, screenWidth * 0.07)),
+    lineHeight: Math.min(36, Math.max(28, screenWidth * 0.09)),
     marginBottom: 0,
   },
   scrollView: {
@@ -210,7 +231,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
   },
   tabText: {
-    fontSize: 14,
+    fontSize: Math.min(14, Math.max(12, screenWidth * 0.035)),
     fontWeight: '600',
     color: colors.textLight,
   },
@@ -224,16 +245,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 8,
   },
   timeSlot: {
     backgroundColor: colors.secondary,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 12,
+    borderRadius: 8,
   },
   timeText: {
-    fontSize: 14,
+    fontSize: Math.min(14, Math.max(12, screenWidth * 0.035)),
     fontWeight: '600',
     color: colors.primary,
   },
@@ -243,26 +264,35 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   statusText: {
-    fontSize: 10,
+    fontSize: Math.min(10, Math.max(8, screenWidth * 0.025)),
     fontWeight: '700',
     color: 'white',
   },
   clientName: {
-    fontSize: 18,
+    fontSize: Math.min(18, Math.max(16, screenWidth * 0.045)),
     fontWeight: '600',
     color: colors.text,
     marginBottom: 4,
   },
-  serviceName: {
-    fontSize: 16,
+  bookingDate: {
+    fontSize: Math.min(14, Math.max(12, screenWidth * 0.035)),
     color: colors.textLight,
-    marginBottom: 4,
+    marginBottom: 12,
+  },
+  serviceInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  serviceName: {
+    fontSize: Math.min(16, Math.max(14, screenWidth * 0.04)),
+    color: colors.text,
   },
   servicePrice: {
-    fontSize: 16,
+    fontSize: Math.min(16, Math.max(14, screenWidth * 0.04)),
     fontWeight: '600',
     color: colors.success,
-    marginBottom: 16,
   },
   bookingActions: {
     flexDirection: 'row',
@@ -278,10 +308,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   confirmButton: {
-    backgroundColor: colors.success,
-    borderColor: colors.success,
-  },
-  completeButton: {
     backgroundColor: colors.primary,
     borderColor: colors.primary,
   },
@@ -289,7 +315,7 @@ const styles = StyleSheet.create({
     borderColor: colors.error,
   },
   actionButtonText: {
-    fontSize: 14,
+    fontSize: Math.min(14, Math.max(12, screenWidth * 0.035)),
     fontWeight: '600',
     color: colors.primary,
   },
@@ -298,14 +324,14 @@ const styles = StyleSheet.create({
     paddingVertical: 60,
   },
   emptyTitle: {
-    fontSize: 20,
+    fontSize: Math.min(20, Math.max(18, screenWidth * 0.05)),
     fontWeight: '600',
     color: colors.text,
     marginTop: 16,
     marginBottom: 8,
   },
   emptySubtitle: {
-    fontSize: 16,
+    fontSize: Math.min(16, Math.max(14, screenWidth * 0.04)),
     color: colors.textLight,
     textAlign: 'center',
   },

@@ -1,5 +1,7 @@
 
-import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { StyleSheet, ViewStyle, TextStyle, Dimensions } from 'react-native';
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 export const colors = {
   primary: '#20B2AA',      // Teal
@@ -20,8 +22,8 @@ export const colors = {
 export const buttonStyles = StyleSheet.create({
   primary: {
     backgroundColor: colors.primary,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
+    paddingHorizontal: Math.max(20, screenWidth * 0.06),
+    paddingVertical: Math.max(10, screenHeight * 0.015),
     borderRadius: 25,
     alignItems: 'center',
     justifyContent: 'center',
@@ -30,8 +32,8 @@ export const buttonStyles = StyleSheet.create({
   },
   secondary: {
     backgroundColor: colors.secondary,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
+    paddingHorizontal: Math.max(20, screenWidth * 0.06),
+    paddingVertical: Math.max(10, screenHeight * 0.015),
     borderRadius: 25,
     alignItems: 'center',
     justifyContent: 'center',
@@ -42,8 +44,8 @@ export const buttonStyles = StyleSheet.create({
     backgroundColor: 'transparent',
     borderWidth: 2,
     borderColor: colors.primary,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
+    paddingHorizontal: Math.max(20, screenWidth * 0.06),
+    paddingVertical: Math.max(10, screenHeight * 0.015),
     borderRadius: 25,
     alignItems: 'center',
     justifyContent: 'center',
@@ -64,40 +66,42 @@ export const commonStyles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingHorizontal: Math.max(16, screenWidth * 0.05),
+    paddingTop: Math.max(16, screenHeight * 0.02),
   },
   title: {
-    fontSize: 28,
+    fontSize: Math.min(28, Math.max(22, screenWidth * 0.07)),
     fontWeight: '700',
     color: colors.text,
     marginBottom: 8,
+    lineHeight: Math.min(36, Math.max(28, screenWidth * 0.09)),
   },
   subtitle: {
-    fontSize: 20,
+    fontSize: Math.min(20, Math.max(18, screenWidth * 0.05)),
     fontWeight: '600',
     color: colors.text,
     marginBottom: 16,
+    lineHeight: Math.min(28, Math.max(24, screenWidth * 0.065)),
   },
   text: {
-    fontSize: 16,
+    fontSize: Math.min(16, Math.max(14, screenWidth * 0.04)),
     fontWeight: '400',
     color: colors.text,
-    lineHeight: 24,
+    lineHeight: Math.min(24, Math.max(20, screenWidth * 0.055)),
   },
   textLight: {
-    fontSize: 14,
+    fontSize: Math.min(14, Math.max(12, screenWidth * 0.035)),
     fontWeight: '400',
     color: colors.textLight,
-    lineHeight: 20,
+    lineHeight: Math.min(20, Math.max(18, screenWidth * 0.05)),
   },
   section: {
-    marginBottom: 24,
+    marginBottom: Math.max(20, screenHeight * 0.025),
   },
   card: {
     backgroundColor: colors.card,
     borderRadius: 16,
-    padding: 16,
+    padding: Math.max(14, screenWidth * 0.04),
     marginBottom: 12,
     boxShadow: `0px 2px 8px ${colors.shadow}`,
     elevation: 3,
@@ -114,8 +118,8 @@ export const commonStyles = StyleSheet.create({
   bottomNav: {
     flexDirection: 'row',
     backgroundColor: colors.backgroundAlt,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
+    paddingVertical: Math.max(10, screenHeight * 0.015),
+    paddingHorizontal: Math.max(16, screenWidth * 0.05),
     borderTopWidth: 1,
     borderTopColor: colors.grey,
     boxShadow: `0px -2px 8px ${colors.shadow}`,
@@ -131,18 +135,18 @@ export const commonStyles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.grey,
     borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
+    paddingHorizontal: Math.max(14, screenWidth * 0.04),
+    paddingVertical: Math.max(10, screenHeight * 0.015),
+    fontSize: Math.min(16, Math.max(14, screenWidth * 0.04)),
     color: colors.text,
     marginBottom: 16,
   },
   searchBar: {
     backgroundColor: colors.backgroundAlt,
     borderRadius: 25,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    marginBottom: 20,
+    paddingHorizontal: Math.max(16, screenWidth * 0.05),
+    paddingVertical: Math.max(10, screenHeight * 0.015),
+    marginBottom: Math.max(16, screenHeight * 0.02),
     flexDirection: 'row',
     alignItems: 'center',
     boxShadow: `0px 2px 4px ${colors.shadow}`,

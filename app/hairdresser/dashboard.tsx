@@ -1,10 +1,12 @@
 
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { colors, commonStyles } from '../../styles/commonStyles';
 import { mockBookings, mockHairdressers } from '../../data/mockData';
 import AppLogo from '../../components/AppLogo';
 import Icon from '../../components/Icon';
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 export default function HairdresserDashboardScreen() {
   const hairdresser = mockHairdressers[0]; // Assuming current user is first hairdresser
@@ -45,16 +47,15 @@ export default function HairdresserDashboardScreen() {
 
   return (
     <ScrollView style={commonStyles.container} showsVerticalScrollIndicator={false}>
-      <View style={commonStyles.content}>
+      <View style={[commonStyles.content, styles.responsiveContent]}>
         <View style={styles.header}>
           <AppLogo size="small" />
-          <View style={styles.headerContent}>
-            <View style={styles.welcomeSection}>
-              <Text style={commonStyles.title}>Dashboard</Text>
-              <Text style={styles.welcomeText}>Welcome back, {hairdresser.name}!</Text>
-            </View>
-            {getPlanBadge()}
-          </View>
+          {getPlanBadge()}
+        </View>
+
+        <View style={styles.welcomeSection}>
+          <Text style={[commonStyles.title, styles.responsiveTitle]}>Dashboard</Text>
+          <Text style={styles.welcomeText}>Welcome back, {hairdresser.name}!</Text>
         </View>
 
         <View style={styles.statsGrid}>
@@ -135,25 +136,29 @@ export default function HairdresserDashboardScreen() {
 }
 
 const styles = StyleSheet.create({
+  responsiveContent: {
+    paddingHorizontal: Math.max(16, screenWidth * 0.05),
+    paddingTop: Math.max(16, screenHeight * 0.02),
+  },
   header: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 24,
-  },
-  headerContent: {
-    flex: 1,
-    flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginLeft: 16,
+    alignItems: 'center',
+    marginBottom: Math.max(24, screenHeight * 0.03),
+    paddingHorizontal: 4,
   },
   welcomeSection: {
-    flex: 1,
+    marginBottom: Math.max(24, screenHeight * 0.03),
+    paddingHorizontal: 4,
+  },
+  responsiveTitle: {
+    fontSize: Math.min(28, Math.max(22, screenWidth * 0.07)),
+    lineHeight: Math.min(36, Math.max(28, screenWidth * 0.09)),
+    marginBottom: 8,
   },
   welcomeText: {
-    fontSize: 16,
+    fontSize: Math.min(16, Math.max(14, screenWidth * 0.04)),
     color: colors.textLight,
-    marginTop: 4,
   },
   planBadge: {
     paddingHorizontal: 12,
@@ -168,23 +173,23 @@ const styles = StyleSheet.create({
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: Math.max(8, screenWidth * 0.02),
     marginBottom: 24,
   },
   statCard: {
-    width: '48%',
+    width: screenWidth < 400 ? '100%' : '48%',
     alignItems: 'center',
     paddingVertical: 20,
   },
   statValue: {
-    fontSize: 24,
+    fontSize: Math.min(24, Math.max(20, screenWidth * 0.06)),
     fontWeight: '700',
     color: colors.text,
     marginTop: 8,
     marginBottom: 4,
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: Math.min(12, Math.max(10, screenWidth * 0.03)),
     color: colors.textLight,
     textAlign: 'center',
   },
@@ -195,11 +200,11 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   bookingTime: {
-    width: 80,
+    width: Math.max(80, screenWidth * 0.2),
     alignItems: 'center',
   },
   timeText: {
-    fontSize: 16,
+    fontSize: Math.min(16, Math.max(14, screenWidth * 0.04)),
     fontWeight: '600',
     color: colors.primary,
   },
@@ -208,18 +213,18 @@ const styles = StyleSheet.create({
     marginLeft: 16,
   },
   clientName: {
-    fontSize: 16,
+    fontSize: Math.min(16, Math.max(14, screenWidth * 0.04)),
     fontWeight: '600',
     color: colors.text,
     marginBottom: 4,
   },
   serviceName: {
-    fontSize: 14,
+    fontSize: Math.min(14, Math.max(12, screenWidth * 0.035)),
     color: colors.textLight,
     marginBottom: 2,
   },
   bookingPrice: {
-    fontSize: 14,
+    fontSize: Math.min(14, Math.max(12, screenWidth * 0.035)),
     fontWeight: '600',
     color: colors.success,
   },
@@ -231,28 +236,28 @@ const styles = StyleSheet.create({
     paddingVertical: 40,
   },
   emptyTitle: {
-    fontSize: 18,
+    fontSize: Math.min(18, Math.max(16, screenWidth * 0.045)),
     fontWeight: '600',
     color: colors.text,
     marginTop: 16,
     marginBottom: 8,
   },
   emptySubtitle: {
-    fontSize: 14,
+    fontSize: Math.min(14, Math.max(12, screenWidth * 0.035)),
     color: colors.textLight,
   },
   actionsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: Math.max(8, screenWidth * 0.02),
   },
   actionCard: {
-    width: '48%',
+    width: screenWidth < 400 ? '100%' : '48%',
     alignItems: 'center',
     paddingVertical: 20,
   },
   actionLabel: {
-    fontSize: 14,
+    fontSize: Math.min(14, Math.max(12, screenWidth * 0.035)),
     color: colors.text,
     marginTop: 8,
     textAlign: 'center',
@@ -265,14 +270,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   upgradeTitle: {
-    fontSize: 18,
+    fontSize: Math.min(18, Math.max(16, screenWidth * 0.045)),
     fontWeight: '600',
     color: colors.text,
     marginTop: 12,
     marginBottom: 8,
   },
   upgradeSubtitle: {
-    fontSize: 14,
+    fontSize: Math.min(14, Math.max(12, screenWidth * 0.035)),
     color: colors.textLight,
     textAlign: 'center',
     marginBottom: 16,
@@ -285,7 +290,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   upgradeButtonText: {
-    fontSize: 14,
+    fontSize: Math.min(14, Math.max(12, screenWidth * 0.035)),
     fontWeight: '600',
     color: 'white',
   },

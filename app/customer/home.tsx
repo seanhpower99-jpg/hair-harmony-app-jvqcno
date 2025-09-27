@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { colors, commonStyles } from '../../styles/commonStyles';
 import { mockHairdressers } from '../../data/mockData';
 import HairdresserCard from '../../components/HairdresserCard';
@@ -8,6 +8,8 @@ import MapPlaceholder from '../../components/MapPlaceholder';
 import SearchBar from '../../components/SearchBar';
 import AppLogo from '../../components/AppLogo';
 import Icon from '../../components/Icon';
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 export default function CustomerHomeScreen() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -36,15 +38,16 @@ export default function CustomerHomeScreen() {
 
   return (
     <ScrollView style={commonStyles.container} showsVerticalScrollIndicator={false}>
-      <View style={commonStyles.content}>
+      <View style={[commonStyles.content, styles.responsiveContent]}>
         <View style={styles.header}>
           <AppLogo size="small" />
-          <View style={styles.headerRight}>
-            <Text style={commonStyles.title}>Find Your Perfect Cut</Text>
-            <TouchableOpacity style={styles.notificationButton}>
-              <Icon name="notifications-outline" size={24} color={colors.text} />
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity style={styles.notificationButton}>
+            <Icon name="notifications-outline" size={24} color={colors.text} />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.titleSection}>
+          <Text style={[commonStyles.title, styles.responsiveTitle]}>Find Your Perfect Cut</Text>
         </View>
 
         <SearchBar
@@ -53,7 +56,7 @@ export default function CustomerHomeScreen() {
           onFilterPress={() => console.log('Open filters')}
         />
 
-        <MapPlaceholder height={180} />
+        <MapPlaceholder height={Math.min(180, screenHeight * 0.25)} />
 
         <View style={commonStyles.section}>
           <View style={styles.sectionHeader}>
@@ -108,31 +111,42 @@ export default function CustomerHomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  responsiveContent: {
+    paddingHorizontal: Math.max(16, screenWidth * 0.05),
+    paddingTop: Math.max(16, screenHeight * 0.02),
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 20,
-  },
-  headerRight: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginLeft: 16,
+    marginBottom: Math.max(24, screenHeight * 0.03),
+    paddingHorizontal: 4,
+  },
+  titleSection: {
+    marginBottom: Math.max(20, screenHeight * 0.025),
+    paddingHorizontal: 4,
+  },
+  responsiveTitle: {
+    fontSize: Math.min(28, Math.max(22, screenWidth * 0.07)),
+    lineHeight: Math.min(36, Math.max(28, screenWidth * 0.09)),
+    marginBottom: 0,
   },
   notificationButton: {
-    padding: 8,
+    padding: 12,
+    borderRadius: 12,
+    backgroundColor: colors.backgroundAlt,
+    boxShadow: `0px 2px 4px ${colors.shadow}`,
+    elevation: 2,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
-    paddingHorizontal: 20,
+    paddingHorizontal: Math.max(4, screenWidth * 0.01),
   },
   seeAllText: {
-    fontSize: 14,
+    fontSize: Math.min(14, Math.max(12, screenWidth * 0.035)),
     color: colors.primary,
     fontWeight: '600',
   },

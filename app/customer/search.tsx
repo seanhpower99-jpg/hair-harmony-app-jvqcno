@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { colors, commonStyles } from '../../styles/commonStyles';
 import { mockHairdressers } from '../../data/mockData';
 import HairdresserCard from '../../components/HairdresserCard';
@@ -8,6 +8,8 @@ import SearchBar from '../../components/SearchBar';
 import SimpleBottomSheet from '../../components/BottomSheet';
 import AppLogo from '../../components/AppLogo';
 import Icon from '../../components/Icon';
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 export default function CustomerSearchScreen() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -42,10 +44,13 @@ export default function CustomerSearchScreen() {
 
   return (
     <View style={commonStyles.container}>
-      <View style={commonStyles.content}>
+      <View style={[commonStyles.content, styles.responsiveContent]}>
         <View style={styles.header}>
           <AppLogo size="small" />
-          <Text style={[commonStyles.title, styles.headerTitle]}>Search</Text>
+        </View>
+
+        <View style={styles.titleSection}>
+          <Text style={[commonStyles.title, styles.responsiveTitle]}>Search</Text>
         </View>
 
         <SearchBar
@@ -144,13 +149,23 @@ export default function CustomerSearchScreen() {
 }
 
 const styles = StyleSheet.create({
+  responsiveContent: {
+    paddingHorizontal: Math.max(16, screenWidth * 0.05),
+    paddingTop: Math.max(16, screenHeight * 0.02),
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: Math.max(24, screenHeight * 0.03),
+    paddingHorizontal: 4,
   },
-  headerTitle: {
-    marginLeft: 16,
+  titleSection: {
+    marginBottom: Math.max(20, screenHeight * 0.025),
+    paddingHorizontal: 4,
+  },
+  responsiveTitle: {
+    fontSize: Math.min(28, Math.max(22, screenWidth * 0.07)),
+    lineHeight: Math.min(36, Math.max(28, screenWidth * 0.09)),
     marginBottom: 0,
   },
   scrollView: {
@@ -161,13 +176,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
+    paddingHorizontal: 4,
   },
   resultsCount: {
-    fontSize: 16,
+    fontSize: Math.min(16, Math.max(14, screenWidth * 0.04)),
     color: colors.textLight,
   },
   clearFilters: {
-    fontSize: 14,
+    fontSize: Math.min(14, Math.max(12, screenWidth * 0.035)),
     color: colors.primary,
     fontWeight: '600',
   },
@@ -176,22 +192,22 @@ const styles = StyleSheet.create({
     paddingVertical: 60,
   },
   emptyTitle: {
-    fontSize: 20,
+    fontSize: Math.min(20, Math.max(18, screenWidth * 0.05)),
     fontWeight: '600',
     color: colors.text,
     marginTop: 16,
     marginBottom: 8,
   },
   emptySubtitle: {
-    fontSize: 16,
+    fontSize: Math.min(16, Math.max(14, screenWidth * 0.04)),
     color: colors.textLight,
     textAlign: 'center',
   },
   filtersContent: {
-    padding: 20,
+    padding: Math.max(16, screenWidth * 0.05),
   },
   filtersTitle: {
-    fontSize: 24,
+    fontSize: Math.min(24, Math.max(20, screenWidth * 0.06)),
     fontWeight: '700',
     color: colors.text,
     marginBottom: 24,
@@ -201,7 +217,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   filterLabel: {
-    fontSize: 16,
+    fontSize: Math.min(16, Math.max(14, screenWidth * 0.04)),
     fontWeight: '600',
     color: colors.text,
     marginBottom: 12,
@@ -222,7 +238,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
   },
   ratingButtonText: {
-    fontSize: 14,
+    fontSize: Math.min(14, Math.max(12, screenWidth * 0.035)),
     fontWeight: '600',
     color: colors.text,
   },
@@ -248,7 +264,7 @@ const styles = StyleSheet.create({
     borderColor: colors.primary,
   },
   checkboxLabel: {
-    fontSize: 16,
+    fontSize: Math.min(16, Math.max(14, screenWidth * 0.04)),
     color: colors.text,
   },
   applyButton: {
@@ -258,7 +274,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   applyButtonText: {
-    fontSize: 16,
+    fontSize: Math.min(16, Math.max(14, screenWidth * 0.04)),
     fontWeight: '600',
     color: 'white',
   },

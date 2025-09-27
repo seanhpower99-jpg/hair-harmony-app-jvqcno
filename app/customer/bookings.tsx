@@ -1,10 +1,12 @@
 
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { colors, commonStyles } from '../../styles/commonStyles';
 import { mockBookings, mockHairdressers } from '../../data/mockData';
 import AppLogo from '../../components/AppLogo';
 import Icon from '../../components/Icon';
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 export default function CustomerBookingsScreen() {
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
@@ -89,10 +91,13 @@ export default function CustomerBookingsScreen() {
 
   return (
     <View style={commonStyles.container}>
-      <View style={commonStyles.content}>
+      <View style={[commonStyles.content, styles.responsiveContent]}>
         <View style={styles.header}>
           <AppLogo size="small" />
-          <Text style={[commonStyles.title, styles.headerTitle]}>My Bookings</Text>
+        </View>
+
+        <View style={styles.titleSection}>
+          <Text style={[commonStyles.title, styles.responsiveTitle]}>My Bookings</Text>
         </View>
 
         <View style={styles.tabContainer}>
@@ -142,13 +147,23 @@ export default function CustomerBookingsScreen() {
 }
 
 const styles = StyleSheet.create({
+  responsiveContent: {
+    paddingHorizontal: Math.max(16, screenWidth * 0.05),
+    paddingTop: Math.max(16, screenHeight * 0.02),
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: Math.max(24, screenHeight * 0.03),
+    paddingHorizontal: 4,
   },
-  headerTitle: {
-    marginLeft: 16,
+  titleSection: {
+    marginBottom: Math.max(20, screenHeight * 0.025),
+    paddingHorizontal: 4,
+  },
+  responsiveTitle: {
+    fontSize: Math.min(28, Math.max(22, screenWidth * 0.07)),
+    lineHeight: Math.min(36, Math.max(28, screenWidth * 0.09)),
     marginBottom: 0,
   },
   scrollView: {
@@ -171,7 +186,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
   },
   tabText: {
-    fontSize: 16,
+    fontSize: Math.min(16, Math.max(14, screenWidth * 0.04)),
     fontWeight: '600',
     color: colors.textLight,
   },
@@ -188,7 +203,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   hairdresserName: {
-    fontSize: 18,
+    fontSize: Math.min(18, Math.max(16, screenWidth * 0.045)),
     fontWeight: '600',
     color: colors.text,
   },
@@ -198,17 +213,17 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   statusText: {
-    fontSize: 10,
+    fontSize: Math.min(10, Math.max(8, screenWidth * 0.025)),
     fontWeight: '700',
     color: 'white',
   },
   businessName: {
-    fontSize: 14,
+    fontSize: Math.min(14, Math.max(12, screenWidth * 0.035)),
     color: colors.textLight,
     marginBottom: 4,
   },
   bookingDate: {
-    fontSize: 16,
+    fontSize: Math.min(16, Math.max(14, screenWidth * 0.04)),
     color: colors.primary,
     fontWeight: '600',
     marginBottom: 12,
@@ -220,11 +235,11 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   serviceName: {
-    fontSize: 16,
+    fontSize: Math.min(16, Math.max(14, screenWidth * 0.04)),
     color: colors.text,
   },
   servicePrice: {
-    fontSize: 16,
+    fontSize: Math.min(16, Math.max(14, screenWidth * 0.04)),
     fontWeight: '600',
     color: colors.success,
   },
@@ -245,7 +260,7 @@ const styles = StyleSheet.create({
     borderColor: colors.error,
   },
   actionButtonText: {
-    fontSize: 14,
+    fontSize: Math.min(14, Math.max(12, screenWidth * 0.035)),
     fontWeight: '600',
     color: colors.primary,
   },
@@ -254,14 +269,14 @@ const styles = StyleSheet.create({
     paddingVertical: 60,
   },
   emptyTitle: {
-    fontSize: 20,
+    fontSize: Math.min(20, Math.max(18, screenWidth * 0.05)),
     fontWeight: '600',
     color: colors.text,
     marginTop: 16,
     marginBottom: 8,
   },
   emptySubtitle: {
-    fontSize: 16,
+    fontSize: Math.min(16, Math.max(14, screenWidth * 0.04)),
     color: colors.textLight,
     textAlign: 'center',
   },
