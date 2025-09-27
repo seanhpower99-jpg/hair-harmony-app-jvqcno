@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { colors, commonStyles } from '../../styles/commonStyles';
-import { mockHairdressers } from '../../data/mockData';
+import { mockHairdressers, mockCustomer } from '../../data/mockData';
 import HairdresserCard from '../../components/HairdresserCard';
 import SearchBar from '../../components/SearchBar';
 import SimpleBottomSheet from '../../components/BottomSheet';
@@ -11,22 +11,90 @@ import Icon from '../../components/Icon';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
+interface SearchFilters {
+  rating: number;
+  availableToday: boolean;
+  services: string[];
+  location: string;
+  previousBarbers: boolean;
+  distance: number;
+}
+
 export default function CustomerSearchScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({
+  const [activePreset, setActivePreset] = useState<string | null>(null);
+  const [filters, setFilters] = useState<SearchFilters>({
     rating: 0,
     availableToday: false,
-    services: [] as string[],
+    services: [],
+    location: '',
+    previousBarbers: false,
+    distance: 10,
   });
+
+  const presetOptions = [
+    {
+      id: 'available-now',
+      label: 'Available Now',
+      icon: 'time-outline',
+      filters: { availableToday: true, rating: 4.0 }
+    },
+    {
+      id: 'top-rated',
+      label: 'Top Rated',
+      icon: 'star-outline',
+      filters: { rating: 4.5 }
+    },
+    {
+      id: 'previous-barbers',
+      label: 'Previous Barbers',
+      icon: 'people-outline',
+      filters: { previousBarbers: true }
+    },
+    {
+      id: 'nearby',
+      label: 'Nearby',
+      icon: 'location-outline',
+      filters: { distance: 2 }
+    },
+  ];
+
+  const serviceCategories = [
+    'haircut',
+    'coloring',
+    'styling',
+    'treatment',
+  ];
+
+  const locationOptions = [
+    'Manhattan',
+    'Brooklyn',
+    'Queens',
+    'Bronx',
+    'Staten Island',
+  ];
 
   const filteredHairdressers = mockHairdressers.filter(hairdresser => {
     const matchesSearch = hairdresser.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          hairdresser.businessName.toLowerCase().includes(searchQuery.toLowerCase());
+    
     const matchesRating = filters.rating === 0 || hairdresser.rating >= filters.rating;
     const matchesAvailability = !filters.availableToday || hairdresser.isAvailableToday;
+    const matchesDistance = !hairdresser.distance || hairdresser.distance <= filters.distance;
+    const matchesLocation = !filters.location || 
+                           hairdresser.location.city.toLowerCase().includes(filters.location.toLowerCase());
     
-    return matchesSearch && matchesRating && matchesAvailability;
+    const matchesPreviousBarbers = !filters.previousBarbers || 
+                                  mockCustomer.previousHairdressers.includes(hairdresser.id);
+    
+    const matchesServices = filters.services.length === 0 || 
+                           filters.services.some(service => 
+                             hairdresser.services.some(s => s.category === service)
+                           );
+    
+    return matchesSearch && matchesRating && matchesAvailability && 
+           matchesDistance && matchesLocation && matchesPreviousBarbers && matchesServices;
   });
 
   const handleHairdresserPress = (hairdresserId: string) => {
@@ -34,12 +102,27 @@ export default function CustomerSearchScreen() {
     // Navigate to hairdresser profile
   };
 
+  const handlePresetPress = (preset: any) => {
+    console.log('Applied preset:', preset.label);
+    setActivePreset(preset.id);
+    setFilters(prev => ({ ...prev, ...preset.filters }));
+  };
+
   const clearFilters = () => {
     setFilters({
       rating: 0,
       availableToday: false,
       services: [],
+      location: '',
+      previousBarbers: false,
+      distance: 10,
     });
+    setActivePreset(null);
+  };
+
+  const hasActiveFilters = () => {
+    return filters.rating > 0 || filters.availableToday || filters.services.length > 0 ||
+           filters.location !== '' || filters.previousBarbers || filters.distance < 10;
   };
 
   return (
@@ -59,11 +142,39 @@ export default function CustomerSearchScreen() {
           onFilterPress={() => setShowFilters(true)}
         />
 
+        {/* Preset Options */}
+        <View style={styles.presetsSection}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.presetsScroll}>
+            {presetOptions.map((preset) => (
+              <TouchableOpacity
+                key={preset.id}
+                style={[
+                  styles.presetButton,
+                  activePreset === preset.id && styles.presetButtonActive
+                ]}
+                onPress={() => handlePresetPress(preset)}
+              >
+                <Icon 
+                  name={preset.icon as any} 
+                  size={18} 
+                  color={activePreset === preset.id ? 'white' : colors.primary} 
+                />
+                <Text style={[
+                  styles.presetButtonText,
+                  activePreset === preset.id && styles.presetButtonTextActive
+                ]}>
+                  {preset.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
         <View style={styles.resultsHeader}>
           <Text style={styles.resultsCount}>
-            {filteredHairdressers.length} hairdressers found
+            {filteredHairdressers.length} hairdresser{filteredHairdressers.length !== 1 ? 's' : ''} found
           </Text>
-          {(filters.rating > 0 || filters.availableToday || filters.services.length > 0) && (
+          {hasActiveFilters() && (
             <TouchableOpacity onPress={clearFilters}>
               <Text style={styles.clearFilters}>Clear Filters</Text>
             </TouchableOpacity>
@@ -99,6 +210,47 @@ export default function CustomerSearchScreen() {
         <View style={styles.filtersContent}>
           <Text style={styles.filtersTitle}>Filters</Text>
           
+          {/* Location Filter */}
+          <View style={styles.filterSection}>
+            <Text style={styles.filterLabel}>Location</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View style={styles.locationButtons}>
+                <TouchableOpacity
+                  style={[
+                    styles.locationButton,
+                    filters.location === '' && styles.locationButtonActive
+                  ]}
+                  onPress={() => setFilters(prev => ({ ...prev, location: '' }))}
+                >
+                  <Text style={[
+                    styles.locationButtonText,
+                    filters.location === '' && styles.locationButtonTextActive
+                  ]}>
+                    All Areas
+                  </Text>
+                </TouchableOpacity>
+                {locationOptions.map((location) => (
+                  <TouchableOpacity
+                    key={location}
+                    style={[
+                      styles.locationButton,
+                      filters.location === location && styles.locationButtonActive
+                    ]}
+                    onPress={() => setFilters(prev => ({ ...prev, location }))}
+                  >
+                    <Text style={[
+                      styles.locationButtonText,
+                      filters.location === location && styles.locationButtonTextActive
+                    ]}>
+                      {location}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ScrollView>
+          </View>
+
+          {/* Rating Filter */}
           <View style={styles.filterSection}>
             <Text style={styles.filterLabel}>Minimum Rating</Text>
             <View style={styles.ratingButtons}>
@@ -122,6 +274,38 @@ export default function CustomerSearchScreen() {
             </View>
           </View>
 
+          {/* Services Filter */}
+          <View style={styles.filterSection}>
+            <Text style={styles.filterLabel}>Services</Text>
+            <View style={styles.servicesGrid}>
+              {serviceCategories.map((service) => (
+                <TouchableOpacity
+                  key={service}
+                  style={[
+                    styles.serviceButton,
+                    filters.services.includes(service) && styles.serviceButtonActive
+                  ]}
+                  onPress={() => {
+                    setFilters(prev => ({
+                      ...prev,
+                      services: prev.services.includes(service)
+                        ? prev.services.filter(s => s !== service)
+                        : [...prev.services, service]
+                    }));
+                  }}
+                >
+                  <Text style={[
+                    styles.serviceButtonText,
+                    filters.services.includes(service) && styles.serviceButtonTextActive
+                  ]}>
+                    {service.charAt(0).toUpperCase() + service.slice(1)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          {/* Quick Filters */}
           <View style={styles.filterSection}>
             <TouchableOpacity
               style={styles.checkboxRow}
@@ -133,6 +317,18 @@ export default function CustomerSearchScreen() {
                 )}
               </View>
               <Text style={styles.checkboxLabel}>Available Today</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.checkboxRow}
+              onPress={() => setFilters(prev => ({ ...prev, previousBarbers: !prev.previousBarbers }))}
+            >
+              <View style={[styles.checkbox, filters.previousBarbers && styles.checkboxActive]}>
+                {filters.previousBarbers && (
+                  <Icon name="checkmark" size={16} color="white" />
+                )}
+              </View>
+              <Text style={styles.checkboxLabel}>Previous Barbers Only</Text>
             </TouchableOpacity>
           </View>
 
@@ -167,6 +363,33 @@ const styles = StyleSheet.create({
     fontSize: Math.min(28, Math.max(22, screenWidth * 0.07)),
     lineHeight: Math.min(36, Math.max(28, screenWidth * 0.09)),
     marginBottom: 0,
+  },
+  presetsSection: {
+    marginBottom: 16,
+  },
+  presetsScroll: {
+    paddingHorizontal: 4,
+  },
+  presetButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: colors.background,
+    marginRight: 12,
+    gap: 6,
+  },
+  presetButtonActive: {
+    backgroundColor: colors.primary,
+  },
+  presetButtonText: {
+    fontSize: Math.min(14, Math.max(12, screenWidth * 0.035)),
+    fontWeight: '600',
+    color: colors.primary,
+  },
+  presetButtonTextActive: {
+    color: 'white',
   },
   scrollView: {
     flex: 1,
@@ -222,6 +445,28 @@ const styles = StyleSheet.create({
     color: colors.text,
     marginBottom: 12,
   },
+  locationButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  locationButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    backgroundColor: colors.background,
+    alignItems: 'center',
+  },
+  locationButtonActive: {
+    backgroundColor: colors.primary,
+  },
+  locationButtonText: {
+    fontSize: Math.min(14, Math.max(12, screenWidth * 0.035)),
+    fontWeight: '600',
+    color: colors.text,
+  },
+  locationButtonTextActive: {
+    color: 'white',
+  },
   ratingButtons: {
     flexDirection: 'row',
     gap: 8,
@@ -245,9 +490,33 @@ const styles = StyleSheet.create({
   ratingButtonTextActive: {
     color: 'white',
   },
+  servicesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  serviceButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    backgroundColor: colors.background,
+    alignItems: 'center',
+  },
+  serviceButtonActive: {
+    backgroundColor: colors.primary,
+  },
+  serviceButtonText: {
+    fontSize: Math.min(14, Math.max(12, screenWidth * 0.035)),
+    fontWeight: '600',
+    color: colors.text,
+  },
+  serviceButtonTextActive: {
+    color: 'white',
+  },
   checkboxRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 16,
   },
   checkbox: {
     width: 24,

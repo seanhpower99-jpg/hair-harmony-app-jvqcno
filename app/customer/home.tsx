@@ -2,17 +2,28 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { colors, commonStyles } from '../../styles/commonStyles';
-import { mockHairdressers } from '../../data/mockData';
+import { 
+  mockHairdressers, 
+  getNextUpcomingBooking, 
+  getHairdresserById, 
+  getServiceById,
+  getRegularHairdressers 
+} from '../../data/mockData';
 import HairdresserCard from '../../components/HairdresserCard';
 import MapPlaceholder from '../../components/MapPlaceholder';
 import SearchBar from '../../components/SearchBar';
 import AppLogo from '../../components/AppLogo';
+import UpcomingBookingCard from '../../components/UpcomingBookingCard';
 import Icon from '../../components/Icon';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 export default function CustomerHomeScreen() {
   const [searchQuery, setSearchQuery] = useState('');
+  
+  const upcomingBooking = getNextUpcomingBooking();
+  const upcomingHairdresser = upcomingBooking ? getHairdresserById(upcomingBooking.hairdresserId) : null;
+  const upcomingService = upcomingBooking ? getServiceById(upcomingBooking.serviceId) : null;
 
   const popularHairdressers = mockHairdressers
     .sort((a, b) => b.rating - a.rating)
@@ -26,6 +37,8 @@ export default function CustomerHomeScreen() {
     .sort((a, b) => (a.distance || 0) - (b.distance || 0))
     .slice(0, 3);
 
+  const regularHairdressers = getRegularHairdressers().slice(0, 3);
+
   const handleHairdresserPress = (hairdresserId: string) => {
     console.log('Selected hairdresser:', hairdresserId);
     // Navigate to hairdresser profile
@@ -34,6 +47,21 @@ export default function CustomerHomeScreen() {
   const handleSectionPress = (section: string) => {
     console.log('Navigate to section:', section);
     // Navigate to full list
+  };
+
+  const handleBookingChange = () => {
+    console.log('Change booking');
+    // Navigate to booking change screen
+  };
+
+  const handleBookingCancel = () => {
+    console.log('Cancel booking');
+    // Show cancel confirmation
+  };
+
+  const handleMessageHairdresser = () => {
+    console.log('Message hairdresser');
+    // Navigate to chat screen
   };
 
   return (
@@ -47,17 +75,64 @@ export default function CustomerHomeScreen() {
         </View>
 
         <View style={styles.titleSection}>
-          <Text style={[commonStyles.title, styles.responsiveTitle]}>Find Your Perfect Cut</Text>
+          <Text style={[commonStyles.title, styles.responsiveTitle]}>
+            {upcomingBooking ? 'Your Next Appointment' : 'Find Your Perfect Cut'}
+          </Text>
         </View>
 
-        <SearchBar
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          onFilterPress={() => console.log('Open filters')}
-        />
+        {/* Dynamic Content Based on Upcoming Booking */}
+        {upcomingBooking && upcomingHairdresser && upcomingService ? (
+          <UpcomingBookingCard
+            booking={upcomingBooking}
+            hairdresser={upcomingHairdresser}
+            service={upcomingService}
+            onChangePress={handleBookingChange}
+            onCancelPress={handleBookingCancel}
+            onMessagePress={handleMessageHairdresser}
+          />
+        ) : (
+          <>
+            <SearchBar
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              onFilterPress={() => console.log('Open filters')}
+            />
+            <MapPlaceholder height={Math.min(180, screenHeight * 0.25)} />
+          </>
+        )}
 
-        <MapPlaceholder height={Math.min(180, screenHeight * 0.25)} />
+        {/* Regular Hairdressers Section (when no upcoming booking) */}
+        {!upcomingBooking && regularHairdressers.length > 0 && (
+          <View style={commonStyles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={commonStyles.subtitle}>Your Regular Hairdressers</Text>
+              <TouchableOpacity onPress={() => handleSectionPress('regular')}>
+                <Text style={styles.seeAllText}>See All</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.availabilityGrid}>
+              {regularHairdressers.map((hairdresser) => (
+                <View key={hairdresser.id} style={styles.availabilityCard}>
+                  <HairdresserCard
+                    hairdresser={hairdresser}
+                    onPress={() => handleHairdresserPress(hairdresser.id)}
+                  />
+                  <View style={styles.availabilityInfo}>
+                    <Text style={styles.availabilityText}>
+                      {hairdresser.isAvailableToday ? (
+                        <Text style={styles.availableText}>Available Today</Text>
+                      ) : (
+                        <Text style={styles.unavailableText}>Booked Today</Text>
+                      )}
+                    </Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
 
+        {/* Popular Hairdressers */}
         <View style={commonStyles.section}>
           <View style={styles.sectionHeader}>
             <Text style={commonStyles.subtitle}>Popular Hairdressers</Text>
@@ -74,6 +149,7 @@ export default function CustomerHomeScreen() {
           ))}
         </View>
 
+        {/* Available Today */}
         <View style={commonStyles.section}>
           <View style={styles.sectionHeader}>
             <Text style={commonStyles.subtitle}>Available Today</Text>
@@ -90,6 +166,7 @@ export default function CustomerHomeScreen() {
           ))}
         </View>
 
+        {/* Nearby */}
         <View style={commonStyles.section}>
           <View style={styles.sectionHeader}>
             <Text style={commonStyles.subtitle}>Nearby</Text>
@@ -149,5 +226,32 @@ const styles = StyleSheet.create({
     fontSize: Math.min(14, Math.max(12, screenWidth * 0.035)),
     color: colors.primary,
     fontWeight: '600',
+  },
+  availabilityGrid: {
+    gap: 12,
+  },
+  availabilityCard: {
+    position: 'relative',
+  },
+  availabilityInfo: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    backgroundColor: colors.backgroundAlt,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    boxShadow: `0px 2px 4px ${colors.shadow}`,
+    elevation: 2,
+  },
+  availabilityText: {
+    fontSize: Math.min(12, Math.max(10, screenWidth * 0.03)),
+    fontWeight: '600',
+  },
+  availableText: {
+    color: colors.success,
+  },
+  unavailableText: {
+    color: colors.error,
   },
 });

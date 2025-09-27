@@ -27,6 +27,7 @@ export interface Hairdresser extends User {
 export interface Customer extends User {
   favoriteHairdressers: string[];
   bookingHistory: Booking[];
+  previousHairdressers: string[];
 }
 
 export interface Service {

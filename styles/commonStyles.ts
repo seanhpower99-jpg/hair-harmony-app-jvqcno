@@ -1,5 +1,5 @@
 
-import { StyleSheet, ViewStyle, TextStyle, Dimensions } from 'react-native';
+import { StyleSheet, ViewStyle, TextStyle, Dimensions, Platform } from 'react-native';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -63,6 +63,8 @@ export const commonStyles = StyleSheet.create({
     backgroundColor: colors.background,
     width: '100%',
     height: '100%',
+    // Add padding bottom for iOS to account for the new bottom nav positioning
+    paddingBottom: Platform.OS === 'ios' ? 100 : 80,
   },
   content: {
     flex: 1,
@@ -115,6 +117,7 @@ export const commonStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  // Legacy bottom nav styles (kept for Android)
   bottomNav: {
     flexDirection: 'row',
     backgroundColor: colors.backgroundAlt,

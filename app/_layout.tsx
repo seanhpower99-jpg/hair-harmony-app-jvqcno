@@ -1,59 +1,72 @@
-import { Stack, useGlobalSearchParams } from 'expo-router';
-import { SafeAreaProvider, useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context';
-import { Platform } from 'react-native';
-import { useEffect, useState } from 'react';
-import { setupErrorLogging } from '../utils/errorLogger';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-const STORAGE_KEY = 'emulated_device';
+import React, { useState } from 'react';
+import { View, StyleSheet } from 'react-native';
+import { Stack, useRouter, useSegments } from 'expo-router';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import BottomNavigation from '../components/BottomNavigation';
+import { useUserType } from '../hooks/useUserType';
+import { colors, commonStyles } from '../styles/commonStyles';
 
 export default function RootLayout() {
-  const actualInsets = useSafeAreaInsets();
-  const { emulate } = useGlobalSearchParams<{ emulate?: string }>();
-  const [storedEmulate, setStoredEmulate] = useState<string | null>(null);
+  const router = useRouter();
+  const segments = useSegments();
+  const { userType } = useUserType();
+  const [activeTab, setActiveTab] = useState('home');
 
-  useEffect(() => {
-    // Set up global error logging
-    setupErrorLogging();
+  const isMainScreen = segments.length >= 2 && 
+    (segments[0] === 'customer' || segments[0] === 'hairdresser');
 
-    if (Platform.OS === 'web') {
-      // If there's a new emulate parameter, store it
-      if (emulate) {
-        localStorage.setItem(STORAGE_KEY, emulate);
-        setStoredEmulate(emulate);
+  const handleTabPress = (tab: string) => {
+    console.log('Tab pressed:', tab);
+    setActiveTab(tab);
+    
+    if (userType === 'customer') {
+      router.push(`/customer/${tab}` as any);
+    } else if (userType === 'hairdresser') {
+      if (tab === 'home') {
+        router.push('/hairdresser/dashboard');
       } else {
-        // If no emulate parameter, try to get from localStorage
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-          setStoredEmulate(stored);
-        }
+        router.push(`/hairdresser/${tab}` as any);
       }
     }
-  }, [emulate]);
-
-  let insetsToUse = actualInsets;
-
-  if (Platform.OS === 'web') {
-    const simulatedInsets = {
-      ios: { top: 47, bottom: 20, left: 0, right: 0 },
-      android: { top: 40, bottom: 0, left: 0, right: 0 },
-    };
-
-    // Use stored emulate value if available, otherwise use the current emulate parameter
-    const deviceToEmulate = storedEmulate || emulate;
-    insetsToUse = deviceToEmulate ? simulatedInsets[deviceToEmulate as keyof typeof simulatedInsets] || actualInsets : actualInsets;
-  }
+  };
 
   return (
     <SafeAreaProvider>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              animation: 'default',
-            }}
-          />
-        </GestureHandlerRootView>
+      <SafeAreaView style={commonStyles.wrapper}>
+        <View style={styles.container}>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="index" />
+            <Stack.Screen name="welcome" />
+            <Stack.Screen name="main" />
+            <Stack.Screen name="customer/home" />
+            <Stack.Screen name="customer/search" />
+            <Stack.Screen name="customer/bookings" />
+            <Stack.Screen name="customer/favorites" />
+            <Stack.Screen name="customer/profile" />
+            <Stack.Screen name="hairdresser/dashboard" />
+            <Stack.Screen name="hairdresser/bookings" />
+            <Stack.Screen name="hairdresser/clients" />
+            <Stack.Screen name="hairdresser/earnings" />
+            <Stack.Screen name="hairdresser/profile" />
+          </Stack>
+          
+          {isMainScreen && userType && (
+            <BottomNavigation
+              activeTab={activeTab}
+              onTabPress={handleTabPress}
+              userType={userType}
+            />
+          )}
+        </View>
+      </SafeAreaView>
     </SafeAreaProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+});

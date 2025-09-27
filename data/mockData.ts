@@ -160,6 +160,44 @@ export const mockHairdressers: Hairdresser[] = [
     distance: 2.1,
     createdAt: new Date('2023-03-10'),
   },
+  {
+    id: '4',
+    name: 'Alex Thompson',
+    email: 'alex@trimz.com',
+    phone: '+1234567894',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+    rating: 4.6,
+    reviewCount: 156,
+    isHairdresser: true,
+    businessName: 'Modern Cuts',
+    bio: 'Contemporary stylist with expertise in trendy cuts and styling.',
+    services: [mockServices[0], mockServices[1]],
+    location: {
+      latitude: 40.7282,
+      longitude: -74.0776,
+      address: '321 West St',
+      city: 'New York',
+      state: 'NY',
+      zipCode: '10014',
+    },
+    availability: [
+      { dayOfWeek: 1, startTime: '10:00', endTime: '18:00', isAvailable: true },
+      { dayOfWeek: 2, startTime: '10:00', endTime: '18:00', isAvailable: true },
+      { dayOfWeek: 3, startTime: '10:00', endTime: '18:00', isAvailable: true },
+      { dayOfWeek: 4, startTime: '10:00', endTime: '18:00', isAvailable: true },
+      { dayOfWeek: 5, startTime: '10:00', endTime: '18:00', isAvailable: true },
+    ],
+    subscriptionPlan: 'premium',
+    socialMedia: {
+      instagram: '@moderncuts',
+    },
+    portfolio: [
+      'https://images.unsplash.com/photo-1605497788044-5a32c7078486?w=300&h=300&fit=crop',
+    ],
+    isAvailableToday: true,
+    distance: 1.5,
+    createdAt: new Date('2023-05-12'),
+  },
 ];
 
 export const mockCustomer: Customer = {
@@ -173,6 +211,7 @@ export const mockCustomer: Customer = {
   isHairdresser: false,
   favoriteHairdressers: ['1', '2'],
   bookingHistory: [],
+  previousHairdressers: ['1', '2', '3'],
   createdAt: new Date('2023-06-01'),
 };
 
@@ -182,7 +221,7 @@ export const mockBookings: Booking[] = [
     customerId: 'customer1',
     hairdresserId: '1',
     serviceId: '1',
-    date: new Date('2024-01-20T14:00:00'),
+    date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
     status: 'confirmed',
     totalPrice: 35,
     notes: 'Please keep it short on the sides',
@@ -198,4 +237,51 @@ export const mockBookings: Booking[] = [
     rating: 5,
     review: 'Great service, very professional!',
   },
+  {
+    id: '3',
+    customerId: 'customer1',
+    hairdresserId: '3',
+    serviceId: '2',
+    date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+    status: 'pending',
+    totalPrice: 65,
+    notes: 'Looking for a new style',
+  },
 ];
+
+// Get upcoming bookings (confirmed or pending, in the future)
+export const getUpcomingBookings = () => {
+  const now = new Date();
+  return mockBookings
+    .filter(booking => 
+      booking.date > now && 
+      (booking.status === 'confirmed' || booking.status === 'pending')
+    )
+    .sort((a, b) => a.date.getTime() - b.date.getTime());
+};
+
+// Get next upcoming booking
+export const getNextUpcomingBooking = () => {
+  const upcomingBookings = getUpcomingBookings();
+  return upcomingBookings.length > 0 ? upcomingBookings[0] : null;
+};
+
+// Get hairdresser by ID
+export const getHairdresserById = (id: string) => {
+  return mockHairdressers.find(h => h.id === id);
+};
+
+// Get service by ID
+export const getServiceById = (id: string) => {
+  return mockServices.find(s => s.id === id);
+};
+
+// Get regular hairdressers (from previous bookings and favorites)
+export const getRegularHairdressers = () => {
+  const regularIds = [...new Set([
+    ...mockCustomer.favoriteHairdressers,
+    ...mockCustomer.previousHairdressers
+  ])];
+  
+  return mockHairdressers.filter(h => regularIds.includes(h.id));
+};
