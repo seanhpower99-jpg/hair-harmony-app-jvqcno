@@ -3,34 +3,18 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { colors, commonStyles } from '../../styles/commonStyles';
 import { mockBookings, mockHairdressers } from '../../data/mockData';
+import AppLogo from '../../components/AppLogo';
 import Icon from '../../components/Icon';
 
 export default function HairdresserBookingsScreen() {
   const [activeTab, setActiveTab] = useState<'today' | 'upcoming' | 'past'>('today');
-  const hairdresser = mockHairdressers[0]; // Current hairdresser
-
-  const today = new Date();
-  const todayBookings = mockBookings.filter(booking => {
-    const bookingDate = new Date(booking.date);
-    return bookingDate.toDateString() === today.toDateString();
-  });
-
-  const upcomingBookings = mockBookings.filter(booking => {
-    const bookingDate = new Date(booking.date);
-    return bookingDate > today && (booking.status === 'confirmed' || booking.status === 'pending');
-  });
-
-  const pastBookings = mockBookings.filter(booking => {
-    const bookingDate = new Date(booking.date);
-    return bookingDate < today || booking.status === 'completed';
-  });
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'confirmed': return colors.success;
       case 'pending': return colors.warning;
-      case 'completed': return colors.primary;
       case 'cancelled': return colors.error;
+      case 'completed': return colors.textLight;
       default: return colors.textLight;
     }
   };
@@ -46,10 +30,11 @@ export default function HairdresserBookingsScreen() {
   };
 
   const renderBookingCard = (booking: any) => {
+    const hairdresser = mockHairdressers[0]; // Current hairdresser
     const service = hairdresser.services.find(s => s.id === booking.serviceId);
-    
+
     return (
-      <TouchableOpacity key={booking.id} style={[commonStyles.card, styles.bookingCard]}>
+      <View key={booking.id} style={[commonStyles.card, styles.bookingCard]}>
         <View style={styles.bookingHeader}>
           <View style={styles.timeSlot}>
             <Text style={styles.timeText}>
@@ -58,37 +43,21 @@ export default function HairdresserBookingsScreen() {
                 minute: '2-digit',
               })}
             </Text>
-            <Text style={styles.dateText}>
-              {new Date(booking.date).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-              })}
-            </Text>
           </View>
-          
-          <View style={styles.bookingInfo}>
-            <Text style={styles.clientName}>Client Booking</Text>
-            <Text style={styles.serviceName}>{service?.name || 'Service'}</Text>
-            <Text style={styles.duration}>{service?.duration || 60} minutes</Text>
-          </View>
-
-          <View style={styles.bookingMeta}>
-            <View style={[styles.statusBadge, { backgroundColor: getStatusColor(booking.status) }]}>
-              <Text style={styles.statusText}>{booking.status.toUpperCase()}</Text>
-            </View>
-            <Text style={styles.price}>${booking.totalPrice}</Text>
+          <View style={[styles.statusBadge, { backgroundColor: getStatusColor(booking.status) }]}>
+            <Text style={styles.statusText}>{booking.status.toUpperCase()}</Text>
           </View>
         </View>
-
-        {booking.notes && (
-          <Text style={styles.notes}>Note: {booking.notes}</Text>
-        )}
+        
+        <Text style={styles.clientName}>Client Booking</Text>
+        <Text style={styles.serviceName}>{service?.name}</Text>
+        <Text style={styles.servicePrice}>${booking.totalPrice}</Text>
 
         <View style={styles.bookingActions}>
           {booking.status === 'pending' && (
             <>
               <TouchableOpacity style={[styles.actionButton, styles.confirmButton]}>
-                <Text style={[styles.actionButtonText, { color: colors.success }]}>Confirm</Text>
+                <Text style={[styles.actionButtonText, { color: 'white' }]}>Confirm</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.actionButton, styles.declineButton]}>
                 <Text style={[styles.actionButtonText, { color: colors.error }]}>Decline</Text>
@@ -98,40 +67,75 @@ export default function HairdresserBookingsScreen() {
           {booking.status === 'confirmed' && (
             <>
               <TouchableOpacity style={styles.actionButton}>
-                <Text style={styles.actionButtonText}>Contact Client</Text>
+                <Text style={styles.actionButtonText}>Reschedule</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.actionButton, styles.completeButton]}>
-                <Text style={[styles.actionButtonText, { color: colors.primary }]}>Mark Complete</Text>
+                <Text style={[styles.actionButtonText, { color: 'white' }]}>Complete</Text>
               </TouchableOpacity>
             </>
           )}
         </View>
-      </TouchableOpacity>
+      </View>
     );
   };
 
   const getCurrentBookings = () => {
+    const today = new Date();
+    const todayStr = today.toDateString();
+
     switch (activeTab) {
-      case 'today': return todayBookings;
-      case 'upcoming': return upcomingBookings;
-      case 'past': return pastBookings;
-      default: return todayBookings;
+      case 'today':
+        return mockBookings.filter(booking => 
+          new Date(booking.date).toDateString() === todayStr
+        );
+      case 'upcoming':
+        return mockBookings.filter(booking => 
+          new Date(booking.date) > today && 
+          (booking.status === 'confirmed' || booking.status === 'pending')
+        );
+      case 'past':
+        return mockBookings.filter(booking => 
+          new Date(booking.date) < today || 
+          booking.status === 'completed' || 
+          booking.status === 'cancelled'
+        );
+      default:
+        return [];
     }
   };
 
   const getEmptyMessage = () => {
     switch (activeTab) {
-      case 'today': return { title: 'No bookings today', subtitle: 'Enjoy your free day!' };
-      case 'upcoming': return { title: 'No upcoming bookings', subtitle: 'New bookings will appear here' };
-      case 'past': return { title: 'No past bookings', subtitle: 'Your booking history will appear here' };
-      default: return { title: 'No bookings', subtitle: '' };
+      case 'today':
+        return {
+          title: 'No bookings today',
+          subtitle: 'Enjoy your free day!'
+        };
+      case 'upcoming':
+        return {
+          title: 'No upcoming bookings',
+          subtitle: 'New bookings will appear here'
+        };
+      case 'past':
+        return {
+          title: 'No past bookings',
+          subtitle: 'Your booking history will appear here'
+        };
+      default:
+        return { title: '', subtitle: '' };
     }
   };
+
+  const currentBookings = getCurrentBookings();
+  const emptyMessage = getEmptyMessage();
 
   return (
     <View style={commonStyles.container}>
       <View style={commonStyles.content}>
-        <Text style={commonStyles.title}>My Bookings</Text>
+        <View style={styles.header}>
+          <AppLogo size="small" />
+          <Text style={[commonStyles.title, styles.headerTitle]}>Bookings</Text>
+        </View>
 
         <View style={styles.tabContainer}>
           <TouchableOpacity
@@ -160,14 +164,14 @@ export default function HairdresserBookingsScreen() {
           </TouchableOpacity>
         </View>
 
-        <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
-          {getCurrentBookings().length > 0 ? (
-            getCurrentBookings().map(renderBookingCard)
-          ) : (
+        <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView}>
+          {currentBookings.map(renderBookingCard)}
+          
+          {currentBookings.length === 0 && (
             <View style={styles.emptyState}>
-              <Icon name="calendar-outline" size={48} color={colors.textLight} />
-              <Text style={styles.emptyTitle}>{getEmptyMessage().title}</Text>
-              <Text style={styles.emptySubtitle}>{getEmptyMessage().subtitle}</Text>
+              <Icon name="calendar-outline" size={64} color={colors.textLight} />
+              <Text style={styles.emptyTitle}>{emptyMessage.title}</Text>
+              <Text style={styles.emptySubtitle}>{emptyMessage.subtitle}</Text>
             </View>
           )}
         </ScrollView>
@@ -177,6 +181,18 @@ export default function HairdresserBookingsScreen() {
 }
 
 const styles = StyleSheet.create({
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  headerTitle: {
+    marginLeft: 16,
+    marginBottom: 0,
+  },
+  scrollView: {
+    flex: 1,
+  },
   tabContainer: {
     flexDirection: 'row',
     backgroundColor: colors.backgroundAlt,
@@ -195,7 +211,7 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '600',
     color: colors.textLight,
   },
   activeTabText: {
@@ -206,102 +222,80 @@ const styles = StyleSheet.create({
   },
   bookingHeader: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 12,
   },
   timeSlot: {
-    width: 80,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: colors.secondary,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
   },
   timeText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     color: colors.primary,
-    marginBottom: 2,
-  },
-  dateText: {
-    fontSize: 12,
-    color: colors.textLight,
-  },
-  bookingInfo: {
-    flex: 1,
-    marginLeft: 16,
-  },
-  clientName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: 4,
-  },
-  serviceName: {
-    fontSize: 14,
-    color: colors.textLight,
-    marginBottom: 2,
-  },
-  duration: {
-    fontSize: 12,
-    color: colors.textLight,
-  },
-  bookingMeta: {
-    alignItems: 'flex-end',
   },
   statusBadge: {
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
-    marginBottom: 8,
   },
   statusText: {
     fontSize: 10,
-    fontWeight: '600',
+    fontWeight: '700',
     color: 'white',
   },
-  price: {
-    fontSize: 16,
+  clientName: {
+    fontSize: 18,
     fontWeight: '600',
     color: colors.text,
+    marginBottom: 4,
   },
-  notes: {
-    fontSize: 14,
+  serviceName: {
+    fontSize: 16,
     color: colors.textLight,
-    fontStyle: 'italic',
-    marginBottom: 12,
-    paddingLeft: 96,
+    marginBottom: 4,
+  },
+  servicePrice: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.success,
+    marginBottom: 16,
   },
   bookingActions: {
     flexDirection: 'row',
     gap: 12,
-    paddingLeft: 96,
   },
   actionButton: {
     flex: 1,
-    paddingVertical: 8,
+    paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 8,
-    backgroundColor: colors.backgroundAlt,
     borderWidth: 1,
-    borderColor: colors.grey,
+    borderColor: colors.primary,
     alignItems: 'center',
   },
   confirmButton: {
+    backgroundColor: colors.success,
     borderColor: colors.success,
+  },
+  completeButton: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   declineButton: {
     borderColor: colors.error,
   },
-  completeButton: {
-    borderColor: colors.primary,
-  },
   actionButtonText: {
     fontSize: 14,
-    fontWeight: '500',
-    color: colors.text,
+    fontWeight: '600',
+    color: colors.primary,
   },
   emptyState: {
     alignItems: 'center',
-    justifyContent: 'center',
     paddingVertical: 60,
-    paddingHorizontal: 40,
   },
   emptyTitle: {
     fontSize: 20,
@@ -314,6 +308,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.textLight,
     textAlign: 'center',
-    lineHeight: 24,
   },
 });

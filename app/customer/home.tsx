@@ -6,6 +6,7 @@ import { mockHairdressers } from '../../data/mockData';
 import HairdresserCard from '../../components/HairdresserCard';
 import MapPlaceholder from '../../components/MapPlaceholder';
 import SearchBar from '../../components/SearchBar';
+import AppLogo from '../../components/AppLogo';
 import Icon from '../../components/Icon';
 
 export default function CustomerHomeScreen() {
@@ -37,10 +38,13 @@ export default function CustomerHomeScreen() {
     <ScrollView style={commonStyles.container} showsVerticalScrollIndicator={false}>
       <View style={commonStyles.content}>
         <View style={styles.header}>
-          <Text style={commonStyles.title}>Find Your Perfect Cut</Text>
-          <TouchableOpacity style={styles.notificationButton}>
-            <Icon name="notifications-outline" size={24} color={colors.text} />
-          </TouchableOpacity>
+          <AppLogo size="small" />
+          <View style={styles.headerRight}>
+            <Text style={commonStyles.title}>Find Your Perfect Cut</Text>
+            <TouchableOpacity style={styles.notificationButton}>
+              <Icon name="notifications-outline" size={24} color={colors.text} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         <SearchBar
@@ -107,8 +111,15 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: 20,
+  },
+  headerRight: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginLeft: 16,
   },
   notificationButton: {
     padding: 8,

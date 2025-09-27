@@ -5,6 +5,7 @@ import { colors, commonStyles, buttonStyles } from '../../styles/commonStyles';
 import { mockCustomer } from '../../data/mockData';
 import { useUserType } from '../../hooks/useUserType';
 import { router } from 'expo-router';
+import AppLogo from '../../components/AppLogo';
 import Icon from '../../components/Icon';
 import SimpleBottomSheet from '../../components/BottomSheet';
 
@@ -40,6 +41,7 @@ export default function CustomerProfileScreen() {
     <View style={commonStyles.container}>
       <ScrollView style={commonStyles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
+          <AppLogo size="small" />
           <TouchableOpacity 
             style={styles.settingsButton}
             onPress={() => setShowSettings(true)}
@@ -118,7 +120,8 @@ export default function CustomerProfileScreen() {
 const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 20,
   },
   settingsButton: {

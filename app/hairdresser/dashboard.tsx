@@ -3,6 +3,7 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { colors, commonStyles } from '../../styles/commonStyles';
 import { mockBookings, mockHairdressers } from '../../data/mockData';
+import AppLogo from '../../components/AppLogo';
 import Icon from '../../components/Icon';
 
 export default function HairdresserDashboardScreen() {
@@ -46,11 +47,14 @@ export default function HairdresserDashboardScreen() {
     <ScrollView style={commonStyles.container} showsVerticalScrollIndicator={false}>
       <View style={commonStyles.content}>
         <View style={styles.header}>
-          <View>
-            <Text style={commonStyles.title}>Dashboard</Text>
-            <Text style={styles.welcomeText}>Welcome back, {hairdresser.name}!</Text>
+          <AppLogo size="small" />
+          <View style={styles.headerContent}>
+            <View style={styles.welcomeSection}>
+              <Text style={commonStyles.title}>Dashboard</Text>
+              <Text style={styles.welcomeText}>Welcome back, {hairdresser.name}!</Text>
+            </View>
+            {getPlanBadge()}
           </View>
-          {getPlanBadge()}
         </View>
 
         <View style={styles.statsGrid}>
@@ -133,9 +137,18 @@ export default function HairdresserDashboardScreen() {
 const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 24,
+  },
+  headerContent: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginLeft: 16,
+  },
+  welcomeSection: {
+    flex: 1,
   },
   welcomeText: {
     fontSize: 16,
